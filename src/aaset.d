@@ -1,6 +1,21 @@
-// Copyright © 2020 Mark Summerfield. All rights reserved.
+/**
+ * This module provides storage for a set of items of the same type.
+ *
+ * The API offers add(), remove(), in (returning a bool for membership),
+ * length, and iteration.
+ *
+ * See the unittest block for examples.
+ *
+ * Authors: Mark Summerfield, mark@qtrac.eu
+ * License: Apache 2.0
+ * Copyright © 2020 Mark Summerfield. All rights reserved.
+*/
 module qtrac.aaset;
 
+/**
+ * A collection type that stores items of the same type. The item type
+ * must support toHash and ==
+*/
 struct AAset(T) if (is(int[T])) {
     private {
         alias Unit = void[0];
@@ -8,15 +23,35 @@ struct AAset(T) if (is(int[T])) {
         Unit[T] set;
     }
 
+    /** Returns: how many items are in the set */
     size_t length() const { return set.length; }
 
+    /**
+     * Adds an item to the set.
+     * Params: item to add.
+    */
     void add(T item) { set[item] = unit; }
 
+    /**
+     * Attempts to remove the given item from the set.
+     * Params: item to remove.
+     * Returns: true if item present (and therefore removed) or false if
+     * the item wasn't present.
+    */
     bool remove(T item) { return set.remove(item); }
 
+    /**
+     * Provides a range.
+     * Returns: a range over the set's items.
+    */
     auto range() { return set.byKey; }
     alias range this;
 
+    /**
+     * Supports the `in` operator.
+     * Params: item to check for membership in the set.
+     * Returns: true if the item is in the set, or false if it isn't.
+    */
     bool opBinaryRight(string op: "in")(T lhs) {
         return (lhs in set) != null;
     }

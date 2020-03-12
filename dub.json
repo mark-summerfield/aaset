@@ -1,9 +1,8 @@
 {
 	"name": "aaset",
 	"authors": [ "Mark Summerfield" ],
-	"description": "A set type as a thin wrapper around an associative array",
+	"description": "A library that provides storage for a set of items of the same type.",
 	"copyright": "Copyright © 2020 Mark Summerfield. All rights reserved.",
 	"targetType": "library",
-	"homepage": "https://www.qtrac.eu/sitemap.html#foss",
-	"license": "boost"
+	"license": "Apache-2.0"
 }
