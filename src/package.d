@@ -1,9 +1,7 @@
 // Copyright © 2020 Mark Summerfield. All rights reserved.
 module qtrac.aaset;
 
-// XXX how do I write the if to ensure T is a valid AA key that suppors
-// toHash & opEquals?
-struct AAset(T) {
+struct AAset(T) if (is(int[T])) {
     private {
         alias Unit = void[0];
         enum unit = Unit.init;
@@ -13,13 +11,11 @@ struct AAset(T) {
     void add(T item) { set[item] = unit; }
     bool remove(T item) { return set.remove(item); }
 
-    // YYY is there a better way so that people can just use
-    //  foreach (var; aaset)
     auto range() { return set.byKey; }
+    alias range this;
 
-    bool opBinaryRight(string op)(T lhs) { // ZZZ doesn't work
-        static if (op == "in") return lhs in set;
-        else static assert(0, "operator " ~ op ~ " not supported");
+    bool opBinaryRight(string op: "in")(T lhs) {
+        return (lhs in set) != null;
     }
     // TODO union(), intersection(), difference(), symmetric_difference()
 }
@@ -49,11 +45,9 @@ unittest {
     assert(words.remove("one"));
     assert(words.length == len - 1);
     immutable expected = ["five", "four", "six", "three", "two"];
-    foreach (i, word; words.range.array.sort.enumerate)
+    foreach (i, word; words.array.sort.enumerate)
         assert(word == expected[i]);
-    /*
     assert("Z" !in words);
-    assert("three" !in words);
-    */
+    assert("three" in words);
 }
 
