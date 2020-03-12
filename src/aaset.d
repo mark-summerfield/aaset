@@ -61,12 +61,33 @@ struct AAset(T) if (is(int[T])) {
         return (lhs in set) != null;
     }
 
+    /**
+     * Provides a string representation of the set (for debugging and
+     * testing)
+     * Returns: string of the unordered items, e.g., {item2, item1, item3}
+    */
+    string toString() const {
+        import std.array: appender;
+        import std.range: enumerate;
+
+        auto buffer = appender!string;
+        buffer.put('{');
+        foreach (i, item; set.byKey.enumerate) {
+            if (i > 0)
+                buffer.put(", ");
+            buffer.put(item);
+        }
+        buffer.put('}');
+        return buffer.data;
+    }
+
     // TODO union(), intersection(), difference(), symmetric_difference()
 }
 
 unittest {
     import std.algorithm: sort;
     import std.array: array;
+    import std.format: format;
     import std.range: enumerate;
     import std.stdio: writeln;
     import std.typecons: Tuple;
@@ -94,6 +115,8 @@ unittest {
     assert("Z" !in words);
     assert("three" in words);
     assert(words.length == 5);
+    auto text = words.toString;
+    assert(text == "{two, four, five, six, three}");
     words.clear;
     assert(words.length == 0);
 }
