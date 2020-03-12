@@ -44,7 +44,7 @@ struct AAset(T) if (is(int[T])) {
      * Provides a range.
      * Returns: a range over the set's items.
     */
-    auto range() { return set.byKey; }
+    auto range() const { return set.byKey; }
     alias range this;
 
     /**
@@ -52,7 +52,7 @@ struct AAset(T) if (is(int[T])) {
      * Params: item to check for membership in the set.
      * Returns: true if the item is in the set, or false if it isn't.
     */
-    bool opBinaryRight(string op: "in")(T lhs) {
+    bool opBinaryRight(string op: "in")(T lhs) const {
         return (lhs in set) != null;
     }
 
