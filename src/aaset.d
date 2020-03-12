@@ -49,8 +49,7 @@ struct AAset(T) if (is(int[T])) {
      * Provides a range.
      * Returns: a range over the set's items.
     */
-    auto range() const { return set.byKey; }
-    alias range this;
+    auto opSlice() const { return set.byKey; }
 
     /**
      * Supports the `in` operator.
@@ -58,7 +57,7 @@ struct AAset(T) if (is(int[T])) {
      * Returns: true if the item is in the set, or false if it isn't.
     */
     bool opBinaryRight(string op: "in")(T lhs) const {
-        return (lhs in set) != null;
+        return (lhs in set) !is null;
     }
 
     /**
@@ -69,6 +68,7 @@ struct AAset(T) if (is(int[T])) {
     */
     string toString() const {
         import std.array: appender;
+        import std.conv: to;
         import std.range: enumerate;
 
         if (set.length == 0)
@@ -78,13 +78,13 @@ struct AAset(T) if (is(int[T])) {
         foreach (i, item; set.byKey.enumerate) {
             if (i > 0)
                 buffer.put(", ");
-            buffer.put(item);
+            buffer.put(item.to!string);
         }
         buffer.put('}');
         return buffer.data;
     }
 
-    // TODO union(), intersection(), difference(), symmetric_difference()
+    // TODO | |= union and & &= intersection
 }
 
 unittest {
@@ -118,8 +118,17 @@ unittest {
     assert("Z" !in words);
     assert("three" in words);
     assert(words.length == 5);
+    // Hostage to fortune regarding hash algorithm
     assert(words.toString == "{two, four, five, six, three}");
     words.clear;
     assert(words.length == 0);
     assert(words.toString == "{}");
+    AAset!int numbers;
+    assert(numbers.length == 0);
+    foreach (x; 10..21)
+        numbers.add(x);
+    assert(numbers.length == 11);
+    // Hostage to fortune regarding hash algorithm
+    assert(numbers.toString ==
+           "{13, 15, 17, 19, 20, 11, 16, 12, 14, 10, 18}");
 }
