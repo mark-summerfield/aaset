@@ -2,7 +2,7 @@
  * This module provides storage for a set of items of the same type.
  *
  * The API offers add(), remove(), in (returning a bool for membership),
- * length, and iteration.
+ * clear, length, and iteration.
  *
  * See the unittest block for examples.
  *
@@ -39,6 +39,11 @@ struct AAset(T) if (is(int[T])) {
      * the item wasn't present.
     */
     bool remove(T item) { return set.remove(item); }
+
+    /**
+     * Removes all items leaving the set empty.
+    */
+    void clear() { set.clear; }
 
     /**
      * Provides a range.
@@ -88,4 +93,7 @@ unittest {
         assert(word == expected[i]);
     assert("Z" !in words);
     assert("three" in words);
+    assert(words.length == 5);
+    words.clear;
+    assert(words.length == 0);
 }
