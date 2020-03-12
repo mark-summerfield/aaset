@@ -1,3 +1,7 @@
+# TODO | |= union and & &= intersection
+# TODO for | and & → maxToStringItems
+#		     = max(maxToStringItems, other.maxToStringItems)
+# TODO for |= and &= → maxToStringItems keep as-is
 src/aaset.d
 
 README.md

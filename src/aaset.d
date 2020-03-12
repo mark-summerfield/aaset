@@ -2,7 +2,8 @@
  * This module provides storage for a set of items of the same type.
  *
  * The API offers add(), remove(), in (returning a bool for membership),
- * clear, length, and iteration.
+ * clear, length, iteration, and toString (e.g., for debugging or
+ * testing).
  *
  * See the unittest block for examples.
  *
@@ -21,6 +22,16 @@ struct AAset(T) if (is(int[T])) {
         alias Unit = void[0];
         enum unit = Unit.init;
         Unit[T] set;
+        size_t maxToStringItems = 0; // means unlimited
+    }
+
+    /** The maxToStringItems controls how many items are output by
+     * toString.
+     * If unspecified or 0, all items are output; otherwise at most
+     * maxToStringItems are output.
+    */
+    this(size_t maxToStringItems) {
+        this.maxToStringItems = maxToStringItems;
     }
 
     /** Returns: how many items are in the set */
@@ -61,8 +72,9 @@ struct AAset(T) if (is(int[T])) {
     }
 
     /**
-     * Provides a string representation of the set (for debugging and
-     * testing)
+     * Provides a string representation of the set (e.g., for debugging
+     * and testing). See the constructor for how to limit how many items
+     * can be output (the default is all of them).
      * Returns: string of the unordered items, e.g., {item2, item1, item3}
      * or {} if the set is empty.
     */
@@ -76,6 +88,11 @@ struct AAset(T) if (is(int[T])) {
         auto buffer = appender!string;
         buffer.put('{');
         foreach (i, item; set.byKey.enumerate) {
+            if (maxToStringItems != 0 && i == maxToStringItems && 
+                   set.length > maxToStringItems) {
+                buffer.put(", …");
+                break;
+            }
             if (i > 0)
                 buffer.put(", ");
             buffer.put(item.to!string);
@@ -83,8 +100,6 @@ struct AAset(T) if (is(int[T])) {
         buffer.put('}');
         return buffer.data;
     }
-
-    // TODO | |= union and & &= intersection
 }
 
 unittest {
@@ -118,17 +133,38 @@ unittest {
     assert("Z" !in words);
     assert("three" in words);
     assert(words.length == 5);
-    // Hostage to fortune regarding hash algorithm
+    // Hostage to fortune regarding ordering due to hash algorithm
     assert(words.toString == "{two, four, five, six, three}");
     words.clear;
     assert(words.length == 0);
     assert(words.toString == "{}");
-    AAset!int numbers;
+    auto numbers = AAset!int(15);
     assert(numbers.length == 0);
     foreach (x; 10..21)
         numbers.add(x);
     assert(numbers.length == 11);
-    // Hostage to fortune regarding hash algorithm
+    // Hostages to fortune regarding ordering due to hash algorithm
     assert(numbers.toString ==
            "{13, 15, 17, 19, 20, 11, 16, 12, 14, 10, 18}");
+    foreach (x; 15..35)
+        numbers.add(x);
+    assert(numbers.toString ==
+           "{13, 26, 15, 24, 17, 30, 19, 20, 21, 28, 33, 11, 16, " ~
+           "29, 27, …}");
+    numbers = AAset!int(0); // same as AAset!int i.e., unlimited
+    foreach (x; 1..11)
+        numbers.add(x);
+    assert(numbers.toString == "{6, 7, 2, 3, 10, 1, 8, 5, 4, 9}");
+    numbers = AAset!int(1);
+    foreach (x; 1..11)
+        numbers.add(x);
+    assert(numbers.toString == "{6, …}");
+    numbers = AAset!int(2);
+    foreach (x; 1..11)
+        numbers.add(x);
+    assert(numbers.toString == "{6, 7, …}");
+    numbers = AAset!int(3);
+    foreach (x; 1..11)
+        numbers.add(x);
+    assert(numbers.toString == "{6, 7, 2, …}");
 }
