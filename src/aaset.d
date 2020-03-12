@@ -65,11 +65,14 @@ struct AAset(T) if (is(int[T])) {
      * Provides a string representation of the set (for debugging and
      * testing)
      * Returns: string of the unordered items, e.g., {item2, item1, item3}
+     * or {} if the set is empty.
     */
     string toString() const {
         import std.array: appender;
         import std.range: enumerate;
 
+        if (set.length == 0)
+            return "{}";
         auto buffer = appender!string;
         buffer.put('{');
         foreach (i, item; set.byKey.enumerate) {
@@ -115,8 +118,8 @@ unittest {
     assert("Z" !in words);
     assert("three" in words);
     assert(words.length == 5);
-    auto text = words.toString;
-    assert(text == "{two, four, five, six, three}");
+    assert(words.toString == "{two, four, five, six, three}");
     words.clear;
     assert(words.length == 0);
+    assert(words.toString == "{}");
 }
