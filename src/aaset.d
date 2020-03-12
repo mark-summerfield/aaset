@@ -54,4 +54,3 @@ unittest {
     assert("Z" !in words);
     assert("three" in words);
 }
-
