@@ -7,8 +7,11 @@ struct AAset(T) if (is(int[T])) {
         enum unit = Unit.init;
         Unit[T] set;
     }
+
     size_t length() const { return set.length; }
+
     void add(T item) { set[item] = unit; }
+
     bool remove(T item) { return set.remove(item); }
 
     auto range() { return set.byKey; }
@@ -17,6 +20,7 @@ struct AAset(T) if (is(int[T])) {
     bool opBinaryRight(string op: "in")(T lhs) {
         return (lhs in set) != null;
     }
+
     // TODO union(), intersection(), difference(), symmetric_difference()
 }
 
