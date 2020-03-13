@@ -33,8 +33,11 @@ struct AAset(T) if (is(int[T])) {
     */
     this(T[] items ...) { add(items); }
 
-    /** Returns: how many items are in the set */
+    /** Returns: how many items are in the set. */
     size_t length() const { return set.length; }
+
+    /** Returns: true if the set is empty; otherwise false. */
+    bool empty() const { return set.length == 0; }
 
     /**
      * Adds any number of items to the set.
@@ -178,7 +181,7 @@ unittest {
                         Pair(4, "four"), Pair(4, "two"), Pair(5, "five"),
                         Pair(6, "six")];
     AAset!string words;
-    assert(words.length == 0);
+    assert(words.length == 0 && words.empty);
     foreach (pair; inputs) {
         words.add(pair.word);
         assert(words.length == pair.count);
@@ -196,11 +199,11 @@ unittest {
     // Hostage to fortune regarding ordering due to hash algorithm
     assert(words.toString == "{two, four, five, six, three}");
     words.clear;
-    assert(words.length == 0);
+    assert(words.length == 0 && words.empty);
     assert(words.toString == "{}");
     AAset!int numbers; // -or- auto numbers = AAset!int();
     numbers.maxToStringItems = 15;
-    assert(numbers.length == 0);
+    assert(numbers.length == 0 && numbers.empty);
     foreach (x; 10..21)
         numbers.add(x);
     assert(numbers.length == 11);
