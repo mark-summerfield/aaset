@@ -31,19 +31,19 @@ struct AAset(T) if (is(int[T])) {
      *  auto lowPrimes = AAset!long(2, 3, 5, 7, 11, 13, 19);
      * Params: zero or more items to initialize the set with.
     */
-    this(T[] items ...) {
-        foreach (item; items)
-            set[item] = unit;
-    }
+    this(T[] items ...) { add(items); }
 
     /** Returns: how many items are in the set */
     size_t length() const { return set.length; }
 
     /**
-     * Adds an item to the set.
-     * Params: item to add.
+     * Adds any number of items to the set.
+     * Params: item(s) to add.
     */
-    void add(T item) { set[item] = unit; }
+    void add(T[] items ...) {
+        foreach (item; items)
+            set[item] = unit;
+    }
 
     /**
      * Attempts to remove the given item from the set.
@@ -182,4 +182,6 @@ unittest {
     assert(numbers.toString == "{6, 7, 2, …}");
     numbers = AAset!int(100, 200, 300, 400, 500);
     assert(numbers.length == 5);
+    numbers.add(600, 700, 800, 100, 200);
+    assert(numbers.length == 8);
 }
