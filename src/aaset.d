@@ -22,16 +22,15 @@ struct AAset(T) if (is(int[T])) {
         alias Unit = void[0];
         enum unit = Unit.init;
         Unit[T] set;
-        size_t maxToStringItems = 0; // means unlimited
     }
 
-    /** The maxToStringItems controls how many items are output by
-     * toString.
-     * If unspecified or 0, all items are output; otherwise at most
-     * maxToStringItems are output.
+    /** The constructor, e.g., AAset!TypeName() or
+     * AAset!TypeName(item1, item2, item3, ...)
+     * Params: zero or more items to initialize the set with.
     */
-    this(size_t maxToStringItems) {
-        this.maxToStringItems = maxToStringItems;
+    this(T[] items ...) {
+        foreach (item; items)
+            set[item] = unit;
     }
 
     /** Returns: how many items are in the set */
@@ -71,10 +70,17 @@ struct AAset(T) if (is(int[T])) {
         return (lhs in set) !is null;
     }
 
+    /** The maxToStringItems controls how many items are output by
+     * toString.
+     * If unspecified or 0, all items are output; otherwise at most
+     * maxToStringItems are output.
+    */
+    size_t maxToStringItems = 0; // 0 means unlimited
+
     /**
      * Provides a string representation of the set (e.g., for debugging
-     * and testing). See the constructor for how to limit how many items
-     * can be output (the default is all of them).
+     * and testing). See maxToStringItems for how to limit how many items
+     * can be output (the default of 0 means all of them).
      * Returns: string of the unordered items, e.g., {item2, item1, item3}
      * or {} if the set is empty.
     */
@@ -138,7 +144,8 @@ unittest {
     words.clear;
     assert(words.length == 0);
     assert(words.toString == "{}");
-    auto numbers = AAset!int(15);
+    auto numbers = AAset!int();
+    numbers.maxToStringItems = 15;
     assert(numbers.length == 0);
     foreach (x; 10..21)
         numbers.add(x);
@@ -151,20 +158,25 @@ unittest {
     assert(numbers.toString ==
            "{13, 26, 15, 24, 17, 30, 19, 20, 21, 28, 33, 11, 16, " ~
            "29, 27, …}");
-    numbers = AAset!int(0); // same as AAset!int i.e., unlimited
+    numbers = AAset!int();
     foreach (x; 1..11)
         numbers.add(x);
     assert(numbers.toString == "{6, 7, 2, 3, 10, 1, 8, 5, 4, 9}");
-    numbers = AAset!int(1);
+    numbers = AAset!int();
+    numbers.maxToStringItems = 1;
     foreach (x; 1..11)
         numbers.add(x);
     assert(numbers.toString == "{6, …}");
-    numbers = AAset!int(2);
+    numbers = AAset!int();
+    numbers.maxToStringItems = 2;
     foreach (x; 1..11)
         numbers.add(x);
     assert(numbers.toString == "{6, 7, …}");
-    numbers = AAset!int(3);
+    numbers = AAset!int();
+    numbers.maxToStringItems = 3;
     foreach (x; 1..11)
         numbers.add(x);
     assert(numbers.toString == "{6, 7, 2, …}");
+    numbers = AAset!int(100, 200, 300, 400, 500);
+    assert(numbers.length == 5);
 }
