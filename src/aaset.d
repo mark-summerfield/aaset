@@ -24,8 +24,11 @@ struct AAset(T) if (is(int[T])) {
         Unit[T] set;
     }
 
-    /** The constructor, e.g., AAset!TypeName() or
-     * AAset!TypeName(item1, item2, item3, ...)
+    /** The constructor.
+     * Examples:
+     *  AAset!string words;
+     *  auto numbers = AAset!int();
+     *  auto lowPrimes = AAset!long(2, 3, 5, 7, 11, 13, 19);
      * Params: zero or more items to initialize the set with.
     */
     this(T[] items ...) {
@@ -144,7 +147,7 @@ unittest {
     words.clear;
     assert(words.length == 0);
     assert(words.toString == "{}");
-    auto numbers = AAset!int();
+    AAset!int numbers; // -or- auto numbers = AAset!int();
     numbers.maxToStringItems = 15;
     assert(numbers.length == 0);
     foreach (x; 10..21)
