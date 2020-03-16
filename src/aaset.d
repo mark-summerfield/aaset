@@ -2,8 +2,7 @@
  * This module provides storage for a set of items of the same type.
  *
  * The API offers add(), remove(), in (returning a bool for membership),
- * clear, length, iteration, and toString (e.g., for debugging or
- * testing).
+ * clear, length, iteration, dup, and toString.
  *
  * See the unittest block at the end for examples.
  *
@@ -18,6 +17,13 @@ module qtrac.aaset;
  * must support toHash and ==
 */
 struct AAset(T) if (is(int[T])) {
+    /** The maxToStringItems controls how many items are output by
+     * toString.
+     * If unspecified or 0, all items are output; otherwise at most
+     * maxToStringItems are output.
+    */
+    size_t maxToStringItems = 0; // 0 means unlimited
+
     private {
         alias Unit = void[0];
         enum unit = Unit.init;
@@ -68,6 +74,17 @@ struct AAset(T) if (is(int[T])) {
     auto opSlice() const { return set.byKey; }
 
     /**
+     * Returns: a copy (duplicate) of this set.
+    */
+    auto dup() const {
+        import std.algorithm: each;
+        AAset!T other;
+        other.maxToStringItems = maxToStringItems;
+        each!(item => other.add(item))(set.byKey);
+        return other;
+    }
+
+    /**
      * Provides the `in` operator.
      * Params: item to check for membership in the set.
      * Returns: true if the item is in the set, or false if it isn't.
@@ -82,8 +99,11 @@ struct AAset(T) if (is(int[T])) {
      * Returns: the intersection of this set and the other set.
     */
     auto opBinary(string op: "&")(ref const AAset!T other) const {
+        import std.algorithm: max;
         import std.range: chain;
         AAset!T intersection;
+        intersection.maxToStringItems = max(maxToStringItems,
+                                            other.maxToStringItems);
         foreach (item; chain(set.byKey, other.set.byKey))
             if (item in set && item in other.set)
                 intersection.add(item);
@@ -109,9 +129,11 @@ struct AAset(T) if (is(int[T])) {
      * Returns: the union of this set and the other set.
     */
     auto opBinary(string op: "|")(ref const AAset!T other) const {
-        import std.algorithm: each;
+        import std.algorithm: each, max;
         import std.range: chain;
         AAset!T unioned;
+        unioned.maxToStringItems = max(maxToStringItems,
+                                       other.maxToStringItems);
         each!(item => unioned.add(item))(chain(set.byKey, other.set.byKey));
         return unioned;
     }
@@ -126,13 +148,6 @@ struct AAset(T) if (is(int[T])) {
         each!(item => add(item))(other.set.byKey);
         return this;
     }
-
-    /** The maxToStringItems controls how many items are output by
-     * toString.
-     * If unspecified or 0, all items are output; otherwise at most
-     * maxToStringItems are output.
-    */
-    size_t maxToStringItems = 0; // 0 means unlimited
 
     /**
      * Provides a string representation of the set (e.g., for debugging
@@ -258,4 +273,10 @@ unittest {
     a |= b;
     assert(a.length == 8 && 1 in a && 2 in a && 3 in a && 4 in a &&
            5 in a && 6 in a && 8 in a && 10 in a);
+    const x = AAset!long(2, 3, 5, 7, 11);
+    assert(x.length == 5 && 2 in x && 3 in x && 5 in x && 6 !in x);
+    immutable y = x.dup;
+    assert(y.length == 5 && 2 in y && 3 in y && 5 in y && 6 !in y);
+    immutable z = one.dup;
+    assert(z.length == 4 && 2 in z && 4 in z && 6 in z && 8 in z);
 }
