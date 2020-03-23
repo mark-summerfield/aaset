@@ -116,9 +116,9 @@ struct AAset(T) if (is(int[T])) {
      * Returns: this set after it has been intersected with the other set.
     */
     auto opOpAssign(string op: "&")(ref const AAset!T other) {
-        import std.range: chain;
-        foreach (item; chain(set.byKey, other.set.byKey))
-            if (item !in set || item !in other.set)
+        import std.array: array;
+        foreach (item; set.byKey.array)
+            if (item !in other.set)
                 set.remove(item);
         return this;
     }
@@ -279,4 +279,9 @@ unittest {
     assert(y.length == 5 && 2 in y && 3 in y && 5 in y && 6 !in y);
     immutable z = one.dup;
     assert(z.length == 4 && 2 in z && 4 in z && 6 in z && 8 in z);
+
+    auto w1 = AAset!string("a", "b", "c", "d", "e", "f", "g");
+    const w2 = AAset!string("c", "f", "y", "z");
+    w1 &= w2;
+    assert(w1.length == 2 && "c" in w1 && "f" in w1);
 }
