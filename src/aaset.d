@@ -2,7 +2,12 @@
  * This module provides storage for a set of items of the same type.
  *
  * The API offers add(), remove(), in (returning a bool for membership),
- * clear, length, iteration, dup, and toString.
+ * clear, empty, length, iteration, dup, and toString. It also supports
+ * set union with & and &= and set intersection with | and |= as well as
+ * == and !=.
+ *
+ * Sets cast to bool (empty giving false, nonempty giving true), so can be
+ * used in conditionals.
  *
  * See the unittest block at the end for examples.
  *
@@ -44,6 +49,9 @@ struct AAset(T) if (is(int[T])) {
 
     /** Returns: true if the set is empty; otherwise false. */
     bool empty() const { return set.length == 0; }
+
+    /** Returns: true if the set is not empty; otherwise false. */
+    bool opCast(T: bool)() const { return set.length != 0; }
 
     /**
      * Adds any number of items to the set.
@@ -147,6 +155,22 @@ struct AAset(T) if (is(int[T])) {
         import std.algorithm: each;
         each!(item => add(item))(other.set.byKey);
         return this;
+    }
+
+    /**
+     * Provides the `==` and `!=` operators.
+     * Params: another set (with the same item type) to compare with.
+     * Returns: true if the sets have the same items; otherwise false.
+    */
+    bool opEquals()(auto ref const AAset!T other) const {
+        return set == other.set;
+    }
+
+    /**
+     * Provides a hash based on the underlying associative array.
+    */
+    size_t toHash() const @safe nothrow {
+        return typeid(set).getHash(&set);
     }
 
     /**
@@ -284,4 +308,25 @@ unittest {
     const w2 = AAset!string("c", "f", "y", "z");
     w1 &= w2;
     assert(w1.length == 2 && "c" in w1 && "f" in w1);
+
+    if (w1) assert(true);
+    AAset!int w3;
+    if (!w3) assert(true);
+    w3.add(1);
+    if (!w3) assert(false);
+    if (w3) assert(true);
+    w3.remove(1);
+    if (!w3) assert(true);
+    if (w3) assert(false);
+
+    assert(w1 != w2);
+    auto w4 = AAset!string("y", "z");
+    assert(w2 != w4);
+    w4.add("z");
+    assert(w2 != w4);
+    w4.add("f");
+    assert(w2 != w4);
+    w4.add("c");
+    assert(w2 == w4);
+
 }
